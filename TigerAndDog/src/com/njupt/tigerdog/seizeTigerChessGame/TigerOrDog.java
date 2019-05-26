@@ -7,14 +7,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 public class TigerOrDog {
-	private static final int tigercenterX = 150;// 老虎中心
-	private static final int tigerCenterY = 270;
+	private static final int borderX = 50;
+	private static final int borderY = 50;
 	private static final double squareSize = 60;
-
-	private static final int borderX1 = 50;
-	private static final int borderX2 = 290;
-	private static final int borderY1 = 170;
-	private static final int borderY2 = 410;
 
 	private int indexX;// 横坐标
 	private int indexY;// 纵坐标
@@ -24,49 +19,76 @@ public class TigerOrDog {
 
 	private int signTigerOrDog;// 标识虎还是猎狗
 
-	public TigerOrDog(String imageURL, int x, int y, int width, int height) {
+	/**
+	 * 
+	 * @param imageURL棋子图片
+	 * @param row棋子在棋盘上的行数----对应于面板上的纵坐标
+	 * @param col棋子在棋盘上的列数----对应于面板上的横坐标
+	 * @param width棋子的宽
+	 * @param height棋子的高
+	 */
+	public TigerOrDog(String imageURL, int row, int col, int width, int height, int sign) {
 
 		lableImage = new ImageIcon(imageURL);
 		lableImage.setImage(lableImage.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
 		labelChessman = new JLabel(lableImage);
 
-		// 标志是虎还是猎狗，如果是虎则为1，如果是猎狗则为0，用于在棋盘数组中显示
-		signTigerOrDog = (x == tigercenterX && y == tigerCenterY ? 1 : 0);
+		// 标志是虎还是猎狗，如果是虎则为1，如果是猎狗则为2，用于在棋盘数组中显示
+		signTigerOrDog = sign;
 
-		// 棋子初始位置(设置的位置是棋子左上角的坐标，而不是中心点的坐标，因为组件在面板中的定位是组件左上角的定位，不是组件正中央的定位)
-		labelChessman.setBounds(x, y, width, height);
+		// 获取棋子在面板中心的坐标（棋盘上的列对应于面板上的横坐标，棋盘上的行对应于面板上的纵坐标）
+		indexX = col * (int) squareSize + borderX;
+		indexY = row * (int) squareSize + borderY;
 
-		// 获取棋子中心坐标
-		indexX = labelChessman.getX() + width / 2;
-		indexY = labelChessman.getY() + height / 2;
+		// 棋子在面板上的初始位置(设置的位置是棋子左上角的坐标，而不是中心点的坐标，因为组件在面板中的定位是组件左上角的定位，不是组件正中央的定位)
+		labelChessman.setBounds(indexX - width / 2, indexY - height / 2, width, height);
 
 		// 为每个棋子独自添加监听器
 		labelChessman.addMouseListener(new MouseHandler());
 	}
 
-	// 获取标签的宽和高
+	/**
+	 * 获取标签的宽
+	 * 
+	 * @return
+	 */
 	public int getWidth() {
 		return labelChessman.getWidth();
 	}
 
+	/**
+	 * 获取标签的高
+	 * 
+	 * @return
+	 */
 	public int getHeight() {
 		return labelChessman.getHeight();
 	}
 
-	// 获取标签
+	/**
+	 * 获取标签
+	 * 
+	 * @return
+	 */
 	public JLabel getLabelChessman() {
 		return labelChessman;
 	}
 
-	// 监听器
+	/**
+	 * 监听器类
+	 * 
+	 * @author 10652
+	 */
 	class MouseHandler extends MouseAdapter {// 鼠标的按和点击、拖动、移动、释放
+
+		// 这些变量可放在外部类中声明，否则会产生许多临时变量
 		int preX;// 按鼠标时，鼠标在棋子上的坐标
 		int preY;
-		int pressX;// 按鼠标时，鼠标在棋盘/面板上的坐标
+		int pressX;// 按鼠标时，鼠标在面板上的坐标
 		int pressY;
-		int releaseX;// 释放鼠标时，鼠标在棋盘/面板上的坐标
+		int releaseX;// 释放鼠标时，鼠标在面板上的坐标
 		int releaseY;
-		int centerX;// 释放鼠标时，棋子中心在棋盘/面板上的坐标
+		int centerX;// 释放鼠标时，棋子中心在面板上的坐标
 		int centerY;
 		int countDrectionX;// 按鼠标和释放鼠标的单位方向差值
 		int countDrectionY;
@@ -78,7 +100,7 @@ public class TigerOrDog {
 			preX = event.getX();
 			preY = event.getY();
 
-			// 鼠标点击时鼠标位于面板上的坐标（此时整个面板的左上角为原点）
+			// 鼠标点击时，鼠标位于面板上的坐标（此时整个面板的左上角为原点）
 			pressX = indexX - getWidth() / 2 + preX;
 			pressY = indexY - getHeight() / 2 + preY;
 		}
@@ -95,20 +117,41 @@ public class TigerOrDog {
 			countDrectionX = (int) Math.round((releaseX - indexX) / squareSize);
 			countDrectionY = (int) Math.round((releaseY - indexY) / squareSize);
 
-			// 用于判断棋子是否出界
+			// 用于判断棋子处于可走动区域外
 			centerX = indexX + (int) squareSize * countDrectionX;
 			centerY = indexY + (int) squareSize * countDrectionY;
 
 			// 横向或者纵向只能走一格，并且不能出界
-			if (Math.abs(countDrectionX) + Math.abs(countDrectionY) == 1 && centerX >= borderX1 && centerX <= borderX2
-					&& centerY >= borderY1 && centerY <= borderY2) {
+			if (Math.abs(countDrectionX) + Math.abs(countDrectionY) == 1
+					&& ChessBoard.stepToPoint(centerX, centerY, signTigerOrDog)) {
+				// 将棋子在棋盘上的旧位置更新为0
+				ChessBoard.setPoint(indexX, indexY, 0);
+				// 更新上一步走棋标识为虎，为下一步猎狗走棋做准备
+				ChessBoard.preChessman = signTigerOrDog;
 
-				// 新坐标（棋子中心在面板上的坐标）
+				// 更新棋子中心在面板上的坐标
 				indexX = centerX;
 				indexY = centerY;
+				// 更新棋盘上棋子的位置
+				ChessBoard.setPoint(indexX, indexY, signTigerOrDog);
 
 				// 设置标签图片的新位置,面板上的定位都是标签的左上角，不是标签的中心
 				labelChessman.setLocation(indexX - getWidth() / 2, indexY - getHeight() / 2);
+
+				/**
+				 * 判断狗被吃 提供参数：棋盘
+				 */
+				if (true) {
+					// 被吃的棋子在棋盘上重置为0，并重绘棋盘面板，消除棋盘上为0的棋子
+					// ChessBoard.resetPointByIndex(x, y);
+				}
+				/**
+				 * 判断获胜与否 提供参数：棋盘
+				 */
+				if (true) {
+					// 弹出对话框，显示获胜方，游戏终止，弹出对话框，是否再来一局
+				}
+				// 否则继续
 			}
 
 		}
@@ -128,5 +171,4 @@ public class TigerOrDog {
 			// 目前用不到
 		}
 	}
-
 }
