@@ -122,11 +122,11 @@ public class TigerOrDog {
 			centerY = indexY + (int) squareSize * countDrectionY;
 
 			// 横向或者纵向只能走一格，并且不能出界
-			if (Math.abs(countDrectionX) + Math.abs(countDrectionY) == 1
-					&& ChessBoard.stepToPoint(centerX, centerY, signTigerOrDog)) {
+			if (ChessBoard.StepChess(centerX, centerY, signTigerOrDog, countDrectionX, countDrectionY)
+					&& ChessBoard.specialJudge(centerX, centerY, indexX, indexY)) {
 				// 将棋子在棋盘上的旧位置更新为0
 				ChessBoard.setPoint(indexX, indexY, 0);
-				// 更新上一步走棋标识为虎，为下一步猎狗走棋做准备
+				// 更新上一步走棋标识,走棋做准备
 				ChessBoard.preChessman = signTigerOrDog;
 
 				// 更新棋子中心在面板上的坐标
@@ -143,7 +143,7 @@ public class TigerOrDog {
 				 */
 				if (true) {
 					// 被吃的棋子在棋盘上重置为0，并重绘棋盘面板，消除棋盘上为0的棋子
-					// ChessBoard.resetPointByIndex(x, y);
+					// ChessBoard.resetPointByIndex(row, col);
 				}
 				/**
 				 * 判断获胜与否 提供参数：棋盘
